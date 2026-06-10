@@ -700,20 +700,20 @@ def main():
     # 微信推送逻辑
     # =========================
 
-    github_schedule = os.getenv("GITHUB_SCHEDULE", "")
+        github_schedule = os.getenv("GITHUB_SCHEDULE", "")
+    
+        if github_schedule in [
+            "25 14 * * 1-5",
+            "30 14 * * 1-5",
+            "35 14 * * 1-5",
+            "40 14 * * 1-5",
+        ]:
+            report_content = build_risk_report(result_df, mkt)
+            send_wechat_push("美股晚间风险扫描", report_content)
+        else:
+            report_content = build_daily_report(result_df, mkt, plan_df)
+            send_wechat_push("美股监控日报", report_content)
 
-    if github_schedule in [
-        "25 14 * * 1-5",
-        "30 14 * * 1-5",
-        "35 14 * * 1-5",
-        "40 14 * * 1-5",
-    ]:
-        report_content = build_risk_report(result_df, mkt)
-        send_wechat_push("美股晚间风险扫描", report_content)
-    else:
-        report_content = build_daily_report(result_df, mkt, plan_df)
-        send_wechat_push("美股监控日报", report_content)
 
-
-if __name__ == "__main__":
-    main()
+    if __name__ == "__main__":
+        main()
