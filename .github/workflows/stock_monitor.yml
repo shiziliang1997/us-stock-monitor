@@ -9,7 +9,7 @@ on:
     - cron: "25 14 * * 1-5"
     - cron: "30 14 * * 1-5"
     - cron: "35 14 * * 1-5"
-    - cron: "40 14 * * 1-5"
+    - cron: "23 15 * * 1-5"
 
   workflow_dispatch:
 
