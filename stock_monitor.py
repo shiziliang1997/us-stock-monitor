@@ -412,7 +412,6 @@ def portfolio_plan():
 def portfolio_status(result_df, mkt):
     red_count = 0
     yellow_count = 0
-    green_count = 0
 
     for _, row in result_df.iterrows():
         light = str(row["信号灯"])
@@ -421,8 +420,6 @@ def portfolio_status(result_df, mkt):
             red_count += 1
         elif "黄灯" in light:
             yellow_count += 1
-        elif "绿灯" in light:
-            green_count += 1
 
     market_status = str(mkt.get("market_status", ""))
 
@@ -688,32 +685,33 @@ def main():
     # =========================
     # 微信推送逻辑
     # =========================
-    # 如果你的 yml 里设置了：
-    # GITHUB_SCHEDULE: ${{ github.event.schedule }}
-    # 则：
-    # 0 1 * * 1-5  = 北京时间09:00，推送完整日报
-    # 0 13 * * 1-5 = 北京时间21:00，推送风险扫描
+    # GitHub schedule:
+    # 0 1 * * 1-5    = 北京时间 09:00，完整日报
+    # 25/30/35/40 14 = 北京时间 22:25/22:30/22:35/22:40，风险扫描
     #
-    # 如果没有设置 GITHUB_SCHEDULE，默认推送完整日报。
+    # cron-job.org / workflow_dispatch 默认没有 GITHUB_SCHEDULE，
+    # 所以默认推送完整日报。
+    #
+    # 如果你以后想让 cron-job.org 触发风险扫描，
+    # 可以在 yml 里增加 REPORT_TYPE=risk，然后这里也支持。
 
-    # =========================
-    # 微信推送逻辑
-    # =========================
+    github_schedule = os.getenv("GITHUB_SCHEDULE", "")
+    report_type = os.getenv("REPORT_TYPE", "")
 
-        github_schedule = os.getenv("GITHUB_SCHEDULE", "")
-    
-        if github_schedule in [
-            "25 14 * * 1-5",
-            "30 14 * * 1-5",
-            "35 14 * * 1-5",
-            "40 14 * * 1-5",
-        ]:
-            report_content = build_risk_report(result_df, mkt)
-            send_wechat_push("美股晚间风险扫描", report_content)
-        else:
-            report_content = build_daily_report(result_df, mkt, plan_df)
-            send_wechat_push("美股监控日报", report_content)
+    risk_schedules = [
+        "25 14 * * 1-5",
+        "30 14 * * 1-5",
+        "35 14 * * 1-5",
+        "40 14 * * 1-5",
+    ]
+
+    if report_type == "risk" or github_schedule in risk_schedules:
+        report_content = build_risk_report(result_df, mkt)
+        send_wechat_push("美股晚间风险扫描", report_content)
+    else:
+        report_content = build_daily_report(result_df, mkt, plan_df)
+        send_wechat_push("美股监控日报", report_content)
 
 
-    if __name__ == "__main__":
-        main()
+if __name__ == "__main__":
+    main()
