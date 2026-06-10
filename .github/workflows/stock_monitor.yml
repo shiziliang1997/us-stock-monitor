@@ -30,5 +30,6 @@ jobs:
       - name: Run stock monitor
         env:
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
+          GITHUB_SCHEDULE: ${{ github.event.schedule }}
         run: |
           python stock_monitor.py
